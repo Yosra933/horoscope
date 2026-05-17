@@ -383,8 +383,6 @@ app.get('/api/tables', async (req, res) => {
   }
 });
 
-const PORT = process.env.API_PORT || 5000;
-
 async function startServer() {
   try {
     await initializeDatabase();
