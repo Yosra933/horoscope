@@ -5,8 +5,9 @@ import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'path';
 import { seedDatabase } from './seeder.js';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,7 +17,6 @@ const { Pool, Client } = pkg;
 dotenv.config();
 
 const app = express();
-const path = require('path');
 
 app.use(cors());
 app.use(express.json());
