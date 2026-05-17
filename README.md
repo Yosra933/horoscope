@@ -5,7 +5,7 @@ Application de voyance, horoscope, tarot et boutique ésotérique.
 ## Prérequis
 
 - Node.js >= 18
-- MySQL (port 3306) avec utilisateur `root` sans mot de passe
+- PostgreSQL (port 5432) avec utilisateur `postgres` et mot de passe `postgres`
 
 ## Installation
 

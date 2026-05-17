@@ -3,8 +3,8 @@
 ╚════════════════════════════════════════════════════════════════════════════════╝
 
 ✅ DATABASE SETUP
-   ✔ MySQL Database Created: horoscope_db
-   ✔ Port: 3306 (default MySQL)
+    ✔ PostgreSQL Database Created: horoscope_db
+    ✔ Port: 5432 (default PostgreSQL)
    ✔ Tables: users, zodiac_signs, products, tarot_cards, orders, order_items
    ✔ Data: 12 zodiac signs, 8 products, 12 tarot cards prepared for seeding
 
@@ -47,7 +47,7 @@
 ╚════════════════════════════════════════════════════════════════════════════════╝
 
 1. npm install
-   → Installs all dependencies (express, mysql2, bcryptjs, jwt, etc.)
+   → Installs all dependencies (express, pg, bcryptjs, jwt, etc.)
 
 2. npm run server
    → Starts Express API on port 5000
@@ -133,7 +133,7 @@ UPDATED FILES:
 
 horoscope_db/
 ├── users
-│   ├── id (INT, PK)
+│   ├── id (SERIAL, PK)
 │   ├── email (VARCHAR, UNIQUE)
 │   ├── password (VARCHAR, hashed)
 │   ├── name (VARCHAR)

@@ -32,7 +32,7 @@ horoscope-app/
 └── vite.config.js           # Configuration Vite
 ```
 
-## Base de données (MySQL - horoscope_db)
+## Base de données (PostgreSQL - horoscope_db)
 
 ### Tables
 
