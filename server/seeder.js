@@ -72,12 +72,14 @@ const TAROT_DATA = [
 ];
 
 async function seedDatabase() {
+  const sslConfig = process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : {};
   const client = new Client({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'horoscope_db',
-    port: parseInt(process.env.DB_PORT) || 5432
+    port: parseInt(process.env.DB_PORT) || 5432,
+    ...sslConfig
   });
   await client.connect();
 

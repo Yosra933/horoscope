@@ -18,12 +18,15 @@ app.use(express.json());
 let pool;
 
 async function initializeDatabase() {
+  const sslConfig = process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : {};
+
   const adminClient = new Client({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     port: parseInt(process.env.DB_PORT) || 5432,
-    database: 'postgres'
+    database: 'postgres',
+    ...sslConfig
   });
   await adminClient.connect();
 
@@ -46,6 +49,7 @@ async function initializeDatabase() {
     port: parseInt(process.env.DB_PORT) || 5432,
     max: 10,
     idleTimeoutMillis: 30000,
+    ...sslConfig
   });
 
   const client = await pool.connect();
