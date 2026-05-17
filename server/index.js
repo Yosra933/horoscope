@@ -10,7 +10,7 @@ import { seedDatabase } from './seeder.js';
 import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const { Pool, Client } = pkg;
 
