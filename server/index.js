@@ -25,17 +25,6 @@ const PORT = process.env.API_PORT || 5000;
 
 let pool;
 
-// Serve frontend static files in production (MUST be after all API routes)
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.join(__dirname, '../dist');
-  if (existsSync(distPath)) {
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-}
-
 async function initializeDatabase() {
   const sslConfig = process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : {};
 
@@ -401,6 +390,18 @@ async function startServer() {
     await initializeDatabase();
     await seedDatabase();
     await seedAdmin();
+
+    // Serve frontend static files in production (MUST be after all API routes)
+    if (process.env.NODE_ENV === 'production') {
+      const distPath = path.join(__dirname, '../dist');
+      if (existsSync(distPath)) {
+        app.use(express.static(distPath));
+        app.get('*', (req, res) => {
+          res.sendFile(path.join(distPath, 'index.html'));
+        });
+      }
+    }
+
     app.listen(PORT, () => {
       console.log(`✓ API server running on http://localhost:${PORT}`);
     });
