@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 export function Auth({ isOpen, onClose, onLoginSuccess }) {
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:5000/api/health')
+      fetch(`${API_URL}/api/health`)
         .then(r => r.json())
         .then(d => console.log('[Auth] Server health:', d.status))
         .catch(e => console.error('[Auth] Server unreachable at http://localhost:5000 - start with: npm run server'));
@@ -27,7 +29,7 @@ export function Auth({ isOpen, onClose, onLoginSuccess }) {
         ? { email, password }
         : { email, password, name };
 
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

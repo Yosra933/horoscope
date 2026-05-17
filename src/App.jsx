@@ -13,6 +13,8 @@ import QuestionModal from "./components/QuestionModal";
 import "./App.css";
 
 export default function App() {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
   const [zodiac,      setZodiac]      = useState([]);
   const [products,    setProducts]    = useState([]);
   const [tarot,       setTarot]       = useState([]);
@@ -44,9 +46,9 @@ export default function App() {
     const fetchData = async () => {
       try {
         const [zodiacRes, productsRes, tarotRes] = await Promise.all([
-          fetch('http://localhost:5000/api/zodiac'),
-          fetch('http://localhost:5000/api/products'),
-          fetch('http://localhost:5000/api/tarot')
+          fetch(`${API_URL}/api/zodiac`),
+          fetch(`${API_URL}/api/products`),
+          fetch(`${API_URL}/api/tarot`)
         ]);
         const zodiacData = await zodiacRes.json();
         const productsData = await productsRes.json();
@@ -126,7 +128,7 @@ export default function App() {
     const token = localStorage.getItem('authToken');
     if (!token) { toast("⚠ Session expirée, reconnectez-vous"); return; }
     try {
-      const res = await fetch('http://localhost:5000/api/orders', {
+      const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({

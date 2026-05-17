@@ -1,116 +1,141 @@
 ```mermaid
 classDiagram
     class User {
-        int id
-        string email
-        string password
-        string name
-        string role
+        +id SERIAL PK
+        +email VARCHAR UNIQUE
+        +password VARCHAR
+        +name VARCHAR
+        +role VARCHAR default user
+        +created_at TIMESTAMP
+        +updated_at TIMESTAMP
     }
     class ZodiacSign {
-        int id
-        string name
-        string symbol
-        string date_range
-        string color
-        int love
-        int work
-        int intuition
-        int luck
-        string message
+        +id SERIAL PK
+        +name VARCHAR
+        +symbol VARCHAR
+        +date_range VARCHAR
+        +color VARCHAR
+        +love INT
+        +work INT
+        +intuition INT
+        +luck INT
+        +message TEXT
+        +created_at TIMESTAMP
     }
     class Product {
-        int id
-        string name
-        decimal price
-        string category
-        string badge
+        +id SERIAL PK
+        +name VARCHAR
+        +price DECIMAL
+        +category VARCHAR
+        +badge VARCHAR
+        +description TEXT
+        +gradient VARCHAR
+        +icon VARCHAR
+        +created_at TIMESTAMP
     }
     class TarotCard {
-        int id
-        string name
-        string emoji
-        string message
-        string tag
+        +id SERIAL PK
+        +name VARCHAR
+        +emoji VARCHAR
+        +message TEXT
+        +tag VARCHAR
+        +created_at TIMESTAMP
     }
     class Order {
-        int id
-        int user_id
-        string customer_name
-        string email
-        decimal total_price
-        string status
+        +id SERIAL PK
+        +user_id INT FK
+        +customer_name VARCHAR
+        +email VARCHAR
+        +address TEXT
+        +card_last4 VARCHAR
+        +total_price DECIMAL
+        +status VARCHAR default pending
+        +created_at TIMESTAMP
     }
     class OrderItem {
-        int id
-        int order_id
-        int product_id
-        int quantity
-        decimal price
+        +id SERIAL PK
+        +order_id INT FK
+        +product_id INT FK
+        +quantity INT
+        +price DECIMAL
+        +created_at TIMESTAMP
     }
-    User "1" --> "0..*" Order
-    Order "1" --> "1..*" OrderItem
-    Product "1" --> "0..*" OrderItem
+    User "1" --> "0..*" Order : places
+    Order "1" --> "1..*" OrderItem : contains
+    Product "1" --> "0..*" OrderItem : referenced in
+```
+
+```mermaid
+sequenceDiagram
+    participant Client as React App
+    participant API as Express Server
+    participant DB as PostgreSQL
+    Client->>API: POST /api/auth/register
+    API->>DB: INSERT INTO users
+    DB-->>API: ok
+    API-->>Client: token + user
+    Client->>API: POST /api/auth/login
+    API->>DB: SELECT FROM users
+    DB-->>API: row
+    API-->>Client: token + user
+    Client->>API: GET /api/zodiac
+    API->>DB: SELECT zodiac_signs
+    DB-->>API: 12 signs
+    API-->>Client: zodiac data
+    Client->>API: GET /api/tarot
+    API->>DB: SELECT tarot_cards
+    DB-->>API: 12 cards
+    API-->>Client: tarot data
+    Client->>API: GET /api/products
+    API->>DB: SELECT products
+    DB-->>API: 8 products
+    API-->>Client: product data
+    Client->>API: POST /api/orders
+    Note over Client,API: Authorization: Bearer token
+    API->>API: jwt.verify(token)
+    API->>DB: INSERT INTO orders
+    DB-->>API: order id
+    loop each item
+        API->>DB: INSERT INTO order_items
+    end
+    API-->>Client: success + orderId
+    Client->>API: GET /api/admin/users
+    Note over Client,API: admin role required
+    API->>API: jwt.verify + check role
+    API->>DB: SELECT users
+    DB-->>API: all users
+    API-->>Client: user list
+    Client->>API: GET /api/admin/orders
+    API->>DB: SELECT orders + items
+    DB-->>API: orders data
+    API-->>Client: orders list
 ```
 
 ```mermaid
 flowchart TB
     subgraph Actors
-        A1[User]
-        A2[Admin]
+        U((User))
+        A((Admin))
     end
     subgraph UseCases
-        Register
-        Login
-        ViewHoroscope
-        DrawTarot
-        BrowseProducts
-        PlaceOrder
-        ManageUsers
-        ViewOrders
-        ManageProducts
+        Register[Register /api/auth/register]
+        Login[Login /api/auth/login]
+        ViewZodiac[View Zodiac /api/zodiac]
+        DrawTarot[Draw Tarot /api/tarot]
+        BrowseProducts[Browse Products /api/products]
+        PlaceOrder[Place Order /api/orders]
+        AskVoyant[Ask AI Voyant]
+        ManageUsers[Manage Users /api/admin/users]
+        ViewOrders[View Orders /api/admin/orders]
     end
-    A1 --> Register
-    A1 --> Login
-    A1 --> ViewHoroscope
-    A1 --> DrawTarot
-    A1 --> BrowseProducts
-    A1 --> PlaceOrder
-    A2 --> ManageUsers
-    A2 --> ViewOrders
-    A2 --> ManageProducts
-```
-
-```mermaid
-sequenceDiagram
-    participant Frontend
-    participant Backend
-    participant Database
-    Frontend->>Backend: register
-    Backend->>Database: insert user
-    Database-->>Backend: ok
-    Backend-->>Frontend: token
-    Frontend->>Backend: login
-    Backend->>Database: select user
-    Database-->>Backend: row
-    Backend-->>Frontend: token
-    Frontend->>Backend: get zodiac
-    Backend->>Database: select zodiac
-    Database-->>Backend: rows
-    Backend-->>Frontend: signs
-    Frontend->>Backend: get tarot
-    Backend->>Database: select tarot
-    Database-->>Backend: rows
-    Backend-->>Frontend: cards
-    Frontend->>Backend: get products
-    Backend->>Database: select products
-    Database-->>Backend: rows
-    Backend-->>Frontend: products
-    Frontend->>Backend: place order
-    Backend->>Backend: verify jwt
-    Backend->>Database: insert order
-    Database-->>Backend: id
-    Backend->>Database: insert items
-    Database-->>Backend: ok
-    Backend-->>Frontend: success
+    U --> Register
+    U --> Login
+    U --> ViewZodiac
+    U --> DrawTarot
+    U --> BrowseProducts
+    U --> PlaceOrder
+    U --> AskVoyant
+    A --> ManageUsers
+    A --> ViewOrders
+    PlaceOrder -.->|requires auth| Login
 ```

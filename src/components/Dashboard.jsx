@@ -8,14 +8,15 @@ export default function Dashboard({ user, onNav, toast }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
   const token = localStorage.getItem('authToken');
 
   useEffect(() => {
     if (!token) return;
     setLoading(true);
     Promise.all([
-      fetch('http://localhost:5000/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
-      fetch('http://localhost:5000/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
+      fetch(`${API_URL}/api/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+      fetch(`${API_URL}/api/admin/orders`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
     ]).then(([usersData, ordersData]) => {
       if (usersData.error) { toast(`⚠ ${usersData.error}`); return; }
       setUsers(usersData);
