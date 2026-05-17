@@ -1,6 +1,8 @@
-import mysql from 'mysql2/promise';
+import pkg from 'pg';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+
+const { Client } = pkg;
 
 dotenv.config();
 
@@ -70,56 +72,53 @@ const TAROT_DATA = [
 ];
 
 async function seedDatabase() {
-  const connection = await mysql.createConnection({
+  const client = new Client({
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'horoscope_db',
-    port: process.env.DB_PORT || 3306
+    port: parseInt(process.env.DB_PORT) || 5432
   });
+  await client.connect();
 
   try {
-    // Check if data already exists
-    const [zodiacRows] = await connection.query('SELECT COUNT(*) as count FROM zodiac_signs');
-    const [productRows] = await connection.query('SELECT COUNT(*) as count FROM products');
-    const [tarotRows] = await connection.query('SELECT COUNT(*) as count FROM tarot_cards');
+    const zodiacCount = await client.query('SELECT COUNT(*) as count FROM zodiac_signs');
+    const productCount = await client.query('SELECT COUNT(*) as count FROM products');
+    const tarotCount = await client.query('SELECT COUNT(*) as count FROM tarot_cards');
 
-    const hasZodiac = zodiacRows[0].count > 0;
-    const hasProducts = productRows[0].count > 0;
-    const hasTarot = tarotRows[0].count > 0;
+    const hasZodiac = parseInt(zodiacCount.rows[0].count, 10) > 0;
+    const hasProducts = parseInt(productCount.rows[0].count, 10) > 0;
+    const hasTarot = parseInt(tarotCount.rows[0].count, 10) > 0;
 
     if (hasZodiac && hasProducts && hasTarot) {
       console.log('✓ Database already seeded with data');
       return;
     }
 
-    // Seed Zodiac Signs
     if (!hasZodiac) {
       for (const sign of ZODIAC_DATA) {
-        await connection.query(
-          'INSERT INTO zodiac_signs (name, symbol, date_range, color, love, work, intuition, luck, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO zodiac_signs (name, symbol, date_range, color, love, work, intuition, luck, message) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
           [sign.name, sign.sym, sign.date, sign.color, sign.love, sign.work, sign.intuition, sign.luck, sign.text]
         );
       }
       console.log('✓ Zodiac signs seeded');
     }
 
-    // Seed Products
     if (!hasProducts) {
       for (const product of PRODUCTS_DATA) {
-        await connection.query(
-          'INSERT INTO products (name, price, category, badge, description, gradient, icon) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO products (name, price, category, badge, description, gradient, icon) VALUES ($1, $2, $3, $4, $5, $6, $7)',
           [product.name, product.price, product.cat, product.badge || null, product.desc, product.g, product.icon]
         );
       }
       console.log('✓ Products seeded');
     }
 
-    // Seed Tarot Cards
     if (!hasTarot) {
       for (const card of TAROT_DATA) {
-        await connection.query(
-          'INSERT INTO tarot_cards (name, emoji, message, tag) VALUES (?, ?, ?, ?)',
+        await client.query(
+          'INSERT INTO tarot_cards (name, emoji, message, tag) VALUES ($1, $2, $3, $4)',
           [card.name, card.emoji, card.msg, card.tag]
         );
       }
@@ -130,7 +129,7 @@ async function seedDatabase() {
   } catch (error) {
     console.error('✗ Seeding failed:', error.message);
   } finally {
-    await connection.end();
+    await client.end();
   }
 }
 
